@@ -34,10 +34,7 @@ export const spec = {
     const urlInfo = getUrlInfo(bidderRequest.refererInfo);
     const cur = getCurrencyType();
     const dnt = utils.getDNT() ? '1' : '0';
-    var imuid = '';
-    if (document.cookie.indexOf('_im_uid.1000283') >= 0) {
-      imuid = storage.getCookie('_im_uid.1000283');
-    }
+    const imuid = storage.getCookie('_im_uid.1000283') || '';
 
     for (let i = 0; i < validBidRequests.length; i++) {
       let queryString = '';
