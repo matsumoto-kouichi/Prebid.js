@@ -1,4 +1,4 @@
-import { getDNT, getBidIdParameter, tryAppendQueryString, isEmpty, createTrackPixelHtml, logError, deepSetValue } from '../src/utils.js';
+import { deepAccess, getDNT, getBidIdParameter, tryAppendQueryString, isEmpty, createTrackPixelHtml, logError, deepSetValue } from '../src/utils.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { config } from '../src/config.js';
 import { BANNER } from '../src/mediaTypes.js';
@@ -34,7 +34,7 @@ export const spec = {
     const urlInfo = getUrlInfo(bidderRequest.refererInfo);
     const cur = getCurrencyType();
     const dnt = getDNT() ? '1' : '0';
-    const imuid = storage.getCookie('_im_uid.1000283') || '';
+    const imuid = deepAccess(bidRequest, 'userId.imuid') || '';
 
     for (let i = 0; i < validBidRequests.length; i++) {
       let queryString = '';
