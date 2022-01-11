@@ -152,7 +152,7 @@
 
 import {config} from '../../src/config.js';
 import {module} from '../../src/hook.js';
-import {logError, logWarn} from '../../src/utils.js';
+import {logError, logInfo, logWarn} from '../../src/utils.js';
 import events from '../../src/events.js';
 import CONSTANTS from '../../src/constants.json';
 import {gdprDataHandler, uspDataHandler} from '../../src/adapterManager.js';
@@ -197,12 +197,13 @@ const setEventsListeners = (function () {
   return function setEventsListeners() {
     if (!registered) {
       Object.entries({
-        [CONSTANTS.EVENTS.AUCTION_INIT]: 'onAuctionInitEvent',
-        [CONSTANTS.EVENTS.AUCTION_END]: 'onAuctionEndEvent',
-        [CONSTANTS.EVENTS.BID_RESPONSE]: 'onBidResponseEvent',
-        [CONSTANTS.EVENTS.BID_REQUESTED]: 'onBidRequestEvent'
-      }).forEach(([ev, handler]) => {
+        [CONSTANTS.EVENTS.AUCTION_INIT]: ['onAuctionInitEvent'],
+        [CONSTANTS.EVENTS.AUCTION_END]: ['onAuctionEndEvent', getAdUnitTargeting],
+        [CONSTANTS.EVENTS.BID_RESPONSE]: ['onBidResponseEvent'],
+        [CONSTANTS.EVENTS.BID_REQUESTED]: ['onBidRequestEvent']
+      }).forEach(([ev, [handler, preprocess]]) => {
         events.on(ev, (args) => {
+          preprocess && preprocess(args);
           subModules.forEach(sm => {
             try {
               sm[handler] && sm[handler](args, sm.config, _userConsent)
@@ -255,6 +256,7 @@ function initSubModules() {
     }
   });
   subModules = subModulesByOrder;
+  logInfo(`Real time data module enabled, using submodules: ${subModules.map((m) => m.name).join(', ')}`);
 }
 
 /**
