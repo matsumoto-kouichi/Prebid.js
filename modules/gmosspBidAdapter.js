@@ -34,7 +34,10 @@ export const spec = {
     const urlInfo = getUrlInfo(bidderRequest.refererInfo);
     const cur = getCurrencyType();
     const dnt = getDNT() ? '1' : '0';
-    const imuid = deepAccess(bidRequest, 'userId.imuid') || '';
+    const imuid = deepAccess(bidRequests, 'userId.imuid') || '';
+    const sharedId = deepAccess(bidRequests, 'userId.sharedid.id') || '';
+    const idlEnv = deepAccess(bidRequests, 'userId.idl_env') || '';
+    const safeFrame = isSafeFrame(bidderRequest.refererInfo);
 
     for (let i = 0; i < validBidRequests.length; i++) {
       let queryString = '';
@@ -50,8 +53,12 @@ export const spec = {
       queryString = tryAppendQueryString(queryString, 'ver', ver);
       queryString = tryAppendQueryString(queryString, 'sid', sid);
       queryString = tryAppendQueryString(queryString, 'im_uid', imuid);
+      queryString = tryAppendQueryString(queryString, 'shared_id', sharedId);
+      queryString = tryAppendQueryString(queryString, 'idl_env', idlEnv);
       queryString = tryAppendQueryString(queryString, 'url', urlInfo.url);
+      queryString = tryAppendQueryString(queryString, 'mpuf', urlInfo.mpuf);
       queryString = tryAppendQueryString(queryString, 'ref', urlInfo.ref);
+      queryString = tryAppendQueryString(queryString, 'sf', urlInfo.sf);
       queryString = tryAppendQueryString(queryString, 'cur', cur);
       queryString = tryAppendQueryString(queryString, 'dnt', dnt);
 
@@ -141,9 +148,37 @@ function getCurrencyType() {
 }
 
 function getUrlInfo(refererInfo) {
+
+  let canonicalLink = null;
+  let mpuf = 0;
+  let safeFrame = 0;
+  let url = getUrl(refererInfo);
+  let canonicalLinkContainer = window.top.document.querySelector("link[rel='canonical']");// html element containing the canonical link
+
+  if (canonicalLinkContainer) {
+    canonicalLink = canonicalLinkContainer.href;
+    mpuf = 1;
+  }
+
+  if (!canonicalLink) {
+    let metaElements = window.top.document.getElementsByTagName('meta');
+    for (let i = 0; i < metaElements.length && !canonicalLink; i++) {
+      if (metaElements[i].getAttribute('property') == 'og:url') {
+        canonicalLink = metaElements[i].content;
+        mpuf = 1;
+      }
+    }
+  }
+
+  url = canonicalLink || url;
+  if (refererInfo.numIframes > 0) {
+    safeFrame = 1;
+  }
   return {
-    url: getUrl(refererInfo),
+    url: encodeURIComponent(url).toString(),
     ref: getReferrer(),
+    mpuf: mpuf,
+    sf: safeFrame
   };
 }
 
