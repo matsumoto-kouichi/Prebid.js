@@ -2,11 +2,9 @@ import { deepAccess, getDNT, getBidIdParameter, tryAppendQueryString, isEmpty, c
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { config } from '../src/config.js';
 import { BANNER } from '../src/mediaTypes.js';
-import { getStorageManager } from '../src/storageManager.js';
 
 const BIDDER_CODE = 'gmossp';
 const ENDPOINT = 'https://sp.gmossp-sp.jp/hb/prebid/query.ad';
-const storage = getStorageManager();
 
 export const spec = {
   code: BIDDER_CODE,
@@ -34,10 +32,6 @@ export const spec = {
     const urlInfo = getUrlInfo(bidderRequest.refererInfo);
     const cur = getCurrencyType();
     const dnt = getDNT() ? '1' : '0';
-    const imuid = deepAccess(bidRequests, 'userId.imuid') || '';
-    const sharedId = deepAccess(bidRequests, 'userId.sharedid.id') || '';
-    const idlEnv = deepAccess(bidRequests, 'userId.idl_env') || '';
-    const safeFrame = isSafeFrame(bidderRequest.refererInfo);
 
     for (let i = 0; i < validBidRequests.length; i++) {
       let queryString = '';
@@ -45,6 +39,9 @@ export const spec = {
       const request = validBidRequests[i];
       const tid = request.transactionId;
       const bid = request.bidId;
+      const imuid = deepAccess(request, 'userId.imuid');
+      const sharedId = deepAccess(request, 'userId.sharedid.id');
+      const idlEnv = deepAccess(request, 'userId.idl_env');
       const ver = '$prebid.version$';
       const sid = getBidIdParameter('sid', request.params);
 
@@ -148,7 +145,6 @@ function getCurrencyType() {
 }
 
 function getUrlInfo(refererInfo) {
-
   let canonicalLink = null;
   let mpuf = 0;
   let safeFrame = 0;
@@ -175,7 +171,7 @@ function getUrlInfo(refererInfo) {
     safeFrame = 1;
   }
   return {
-    url: encodeURIComponent(url).toString(),
+    url: url,
     ref: getReferrer(),
     mpuf: mpuf,
     sf: safeFrame

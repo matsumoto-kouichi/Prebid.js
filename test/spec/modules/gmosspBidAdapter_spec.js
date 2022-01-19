@@ -37,7 +37,7 @@ describe('GmosspAdapter', function () {
 
   describe('buildRequests', function () {
     const storage = getStorageManager();
-    const bidRequests = [
+    let bidRequests = [
       {
         bidder: 'gmossp',
         params: {
@@ -53,7 +53,13 @@ describe('GmosspAdapter', function () {
         bidderRequestId: '1f4001782ac16c',
         auctionId: 'aba03555-4802-4c45-9f15-05ffa8594cff',
         transactionId: '791e9d84-af92-4903-94da-24c7426d9d0c',
-        userId: {}
+        userId: {
+          imuid: 'h.0a4749e7ffe09fa6',
+          sharedid: {
+            id: '1111'
+          },
+          idl_env: '1111',
+        }
       }
     ];
 
@@ -63,10 +69,6 @@ describe('GmosspAdapter', function () {
           referer: 'https://hoge.com'
         }
       };
-      bidRequests.userId.imuid = 'h.0a4749e7ffe09fa6';
-      bidRequests.userId.sharedid.id = '1111';
-      bidRequests.userId.idl_env = '1111';
-      
       const requests = spec.buildRequests(bidRequests, bidderRequest);
       expect(requests[0].url).to.equal(ENDPOINT);
       expect(requests[0].method).to.equal('GET');
@@ -77,11 +79,11 @@ describe('GmosspAdapter', function () {
       const bidderRequest = {
         refererInfo: {
           referer: ''
-        }
+        },
       };
-      bidRequests.userId.imuid = '';
-      bidRequests.userId.sharedid.id = '';
-      bidRequests.userId.idl_env = '';
+      bidRequests[0].userId.imuid = '';
+      bidRequests[0].userId.sharedid.id = '';
+      bidRequests[0].userId.idl_env = '';
 
       const requests = spec.buildRequests(bidRequests, bidderRequest);
       const result = 'tid=791e9d84-af92-4903-94da-24c7426d9d0c&bid=2b84475b5b636e&ver=$prebid.version$&sid=123456&url=' + encodeURIComponent(window.top.location.href) + '&cur=JPY&dnt=0&';
