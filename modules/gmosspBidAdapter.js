@@ -1,4 +1,4 @@
-import { deepAccess, getDNT, getBidIdParameter, tryAppendQueryString, isEmpty, createTrackPixelHtml, logError, deepSetValue } from '../src/utils.js';
+import { deepAccess, getDNT, getBidIdParameter, tryAppendQueryString, isEmpty, createTrackPixelHtml, logError, deepSetValue, getWindowSelf } from '../src/utils.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { config } from '../src/config.js';
 import { BANNER } from '../src/mediaTypes.js';
@@ -147,7 +147,6 @@ function getCurrencyType() {
 function getUrlInfo(refererInfo) {
   let canonicalLink = null;
   let mpuf = 0;
-  let safeFrame = 0;
   let url = getUrl(refererInfo);
   let canonicalLinkContainer = window.top.document.querySelector("link[rel='canonical']");// html element containing the canonical link
 
@@ -167,14 +166,12 @@ function getUrlInfo(refererInfo) {
   }
 
   url = canonicalLink || url;
-  if (refererInfo.numIframes > 0) {
-    safeFrame = 1;
-  }
+
   return {
     url: url,
     ref: getReferrer(),
     mpuf: mpuf,
-    sf: safeFrame
+    sf: isSafeFrameWindow(),
   };
 }
 
@@ -196,6 +193,11 @@ function getReferrer() {
   } catch (e) {
     return document.referrer;
   }
+}
+
+function isSafeFrameWindow() {
+  const ws = getWindowSelf();
+  return !!(ws.$sf && ws.$sf.ext);
 }
 
 registerBidder(spec);
