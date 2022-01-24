@@ -54,6 +54,7 @@ export const spec = {
       queryString = tryAppendQueryString(queryString, 'idl_env', idlEnv);
       queryString = tryAppendQueryString(queryString, 'url', urlInfo.url);
       queryString = tryAppendQueryString(queryString, 'mpuf', urlInfo.mpuf);
+      queryString = tryAppendQueryString(queryString, 'ca', urlInfo.canonicalurl);
       queryString = tryAppendQueryString(queryString, 'ref', urlInfo.ref);
       queryString = tryAppendQueryString(queryString, 'sf', urlInfo.sf);
       queryString = tryAppendQueryString(queryString, 'cur', cur);
@@ -116,7 +117,7 @@ export const spec = {
    * @param {ServerResponse[]} serverResponses List of server's responses.
    * @return {UserSync[]} The user syncs which should be dropped.
    */
-  getUserSyncs: function(syncOptions, serverResponses) {
+  getUserSyncs: function (syncOptions, serverResponses) {
     const syncs = [];
     if (!serverResponses.length) {
       return syncs;
@@ -165,10 +166,9 @@ function getUrlInfo(refererInfo) {
     }
   }
 
-  url = canonicalLink || url;
-
   return {
     url: url,
+    canonicalurl: canonicalLink,
     ref: getReferrer(),
     mpuf: mpuf,
     sf: isSafeFrameWindow(),
