@@ -53,8 +53,7 @@ export const spec = {
       queryString = tryAppendQueryString(queryString, 'shared_id', sharedId);
       queryString = tryAppendQueryString(queryString, 'idl_env', idlEnv);
       queryString = tryAppendQueryString(queryString, 'url', urlInfo.url);
-      queryString = tryAppendQueryString(queryString, 'mpuf', urlInfo.mpuf);
-      queryString = tryAppendQueryString(queryString, 'ca', urlInfo.canonicalurl);
+      queryString = tryAppendQueryString(queryString, 'meta_url', urlInfo.canonicalLink);
       queryString = tryAppendQueryString(queryString, 'ref', urlInfo.ref);
       queryString = tryAppendQueryString(queryString, 'sf', urlInfo.sf);
       queryString = tryAppendQueryString(queryString, 'cur', cur);
@@ -147,13 +146,11 @@ function getCurrencyType() {
 
 function getUrlInfo(refererInfo) {
   let canonicalLink = null;
-  let mpuf = 0;
   let url = getUrl(refererInfo);
   let canonicalLinkContainer = window.top.document.querySelector("link[rel='canonical']");// html element containing the canonical link
 
   if (canonicalLinkContainer) {
     canonicalLink = canonicalLinkContainer.href;
-    mpuf = 1;
   }
 
   if (!canonicalLink) {
@@ -161,16 +158,14 @@ function getUrlInfo(refererInfo) {
     for (let i = 0; i < metaElements.length && !canonicalLink; i++) {
       if (metaElements[i].getAttribute('property') == 'og:url') {
         canonicalLink = metaElements[i].content;
-        mpuf = 1;
       }
     }
   }
 
   return {
     url: url,
-    canonicalurl: canonicalLink,
+    canonicalLink: canonicalLink,
     ref: getReferrer(),
-    mpuf: mpuf,
     sf: isSafeFrameWindow(),
   };
 }
